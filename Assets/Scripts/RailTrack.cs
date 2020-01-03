@@ -29,6 +29,12 @@ public class RailTrack : MonoBehaviour
             Gizmos.DrawSphere(segmentBaseUpperLeft + segmentOffset, 0.1f);
             Gizmos.DrawSphere(segmentBaseUpperRight + segmentOffset, 0.1f);
             Gizmos.DrawSphere(segementBaseLowerRight + segmentOffset, 0.1f);
+
+            Vector3 heightOffset = new Vector3(0, segmentHeight, 0);
+            Gizmos.DrawSphere(segmentBaseLowerLeft + segmentOffset + heightOffset, 0.1f);
+            Gizmos.DrawSphere(segmentBaseUpperLeft + segmentOffset + heightOffset, 0.1f);
+            Gizmos.DrawSphere(segmentBaseUpperRight + segmentOffset + heightOffset, 0.1f);
+            Gizmos.DrawSphere(segementBaseLowerRight + segmentOffset + heightOffset, 0.1f);
         }
     }
 
