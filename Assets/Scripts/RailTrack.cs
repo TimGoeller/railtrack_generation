@@ -102,7 +102,9 @@ public class RailTrack : MonoBehaviour
 
         #endregion
 
-        Vector3[] vertices = new Vector3[segmentCount * 14 + 20];
+        const int segmentVerticeCount = 36;
+        const int trackVerticeCount = 20;
+        Vector3[] vertices = new Vector3[segmentCount * segmentVerticeCount + trackVerticeCount];
         int[][] submeshTriangles = new int[segmentCount + 2][];
 
         List<Vector2> uvs = new List<Vector2>();
@@ -233,8 +235,8 @@ public class RailTrack : MonoBehaviour
         uvs.Add(new Vector2(totalTrackLength, trackHeight));
         uvs.Add(new Vector2(0, trackHeight));
 
-        uvs.Add(new Vector2(0, 0));
-        uvs.Add(new Vector2(segmentWidth, 0));
+        uvs.Add(new Vector2(0, trackHeight + trackWidth));
+        uvs.Add(new Vector2(segmentWidth, trackHeight + trackWidth));
 
 
         uvs.Add(new Vector2(totalTrackLength, 0));
@@ -255,123 +257,309 @@ public class RailTrack : MonoBehaviour
         for (int i = 0; i < segmentCount; i++)
         {
             Vector3 segmentOffset = new Vector3(0, 0, i * segmentWidth + i * spaceBetweenSegments);
-            int segmentIndexOffset = 20 + 14 * i;
-            vertices[0 + segmentIndexOffset] = segmentBaseLowerLeft + segmentOffset;
-            vertices[1 + segmentIndexOffset] = segmentBaseUpperLeft + segmentOffset;
-            vertices[2 + segmentIndexOffset] = segmentBaseUpperRight + segmentOffset;
-            vertices[3 + segmentIndexOffset] = segmentBaseLowerRight + segmentOffset;
-
-            vertices[4 + segmentIndexOffset] = segmentMiddleLowerLeft + segmentOffset;
-            vertices[5 + segmentIndexOffset] = segmentMiddleUpperLeft + segmentOffset;
-            vertices[6 + segmentIndexOffset] = segmentMiddleUpperRight + segmentOffset;
-            vertices[7 + segmentIndexOffset] = segmentMiddleLowerRight + segmentOffset;
-
-            vertices[8 + segmentIndexOffset] = segmentTopLowerLeft + segmentOffset;
-            vertices[9 + segmentIndexOffset] = segmentTopUpperLeft + segmentOffset;
-            vertices[10 + segmentIndexOffset] = segmentTopUpperRight + segmentOffset;
-            vertices[11 + segmentIndexOffset] = segmentTopLowerRight + segmentOffset;
-
-            vertices[12 + segmentIndexOffset] = vertices[8 + segmentIndexOffset];
-            vertices[13 + segmentIndexOffset] = vertices[11 + segmentIndexOffset];
+            int segmentIndexOffset = trackVerticeCount + segmentVerticeCount * i;
 
             int currentTriangleArrayIndex = i + 2;
             submeshTriangles[currentTriangleArrayIndex] = new int[54];
-            #region Segment Base Triangles
+
+            #region Segment Base
+
+            //Front Face
+            vertices[0 + segmentIndexOffset] = segmentBaseLowerLeft + segmentOffset;
+            vertices[1 + segmentIndexOffset] = segmentBaseLowerRight + segmentOffset;
+            vertices[2 + segmentIndexOffset] = segmentMiddleLowerLeft + segmentOffset;
+            vertices[3 + segmentIndexOffset] = segmentMiddleLowerRight + segmentOffset;
+
             submeshTriangles[currentTriangleArrayIndex][0] = 0 + segmentIndexOffset;
-            submeshTriangles[currentTriangleArrayIndex][1] = 4 + segmentIndexOffset;
+            submeshTriangles[currentTriangleArrayIndex][1] = 2 + segmentIndexOffset;
             submeshTriangles[currentTriangleArrayIndex][2] = 3 + segmentIndexOffset;
 
-            submeshTriangles[currentTriangleArrayIndex][3] = 3 + segmentIndexOffset;
-            submeshTriangles[currentTriangleArrayIndex][4] = 4 + segmentIndexOffset;
-            submeshTriangles[currentTriangleArrayIndex][5] = 7 + segmentIndexOffset;
+            submeshTriangles[currentTriangleArrayIndex][3] = 0 + segmentIndexOffset;
+            submeshTriangles[currentTriangleArrayIndex][4] = 3 + segmentIndexOffset;
+            submeshTriangles[currentTriangleArrayIndex][5] = 1 + segmentIndexOffset;
 
-            submeshTriangles[currentTriangleArrayIndex][6] = 3 + segmentIndexOffset;
-            submeshTriangles[currentTriangleArrayIndex][7] = 7 + segmentIndexOffset;
-            submeshTriangles[currentTriangleArrayIndex][8] = 2 + segmentIndexOffset;
+            uvs.Add(new Vector2(0, 0));
+            uvs.Add(new Vector2(trackTotalWidth, 0));
+            uvs.Add(new Vector2(0, segmentMiddleLowerLeft.y));
+            uvs.Add(new Vector2(trackTotalWidth, segmentMiddleLowerLeft.y));
 
-            submeshTriangles[currentTriangleArrayIndex][9] = 2 + segmentIndexOffset;
+            //Right Face
+            vertices[4 + segmentIndexOffset] = segmentBaseLowerRight + segmentOffset;
+            vertices[5 + segmentIndexOffset] = segmentBaseUpperRight + segmentOffset;
+            vertices[6 + segmentIndexOffset] = segmentMiddleLowerRight + segmentOffset;
+            vertices[7 + segmentIndexOffset] = segmentMiddleUpperRight + segmentOffset;
+
+            submeshTriangles[currentTriangleArrayIndex][6] = 4 + segmentIndexOffset;
+            submeshTriangles[currentTriangleArrayIndex][7] = 6 + segmentIndexOffset;
+            submeshTriangles[currentTriangleArrayIndex][8] = 7 + segmentIndexOffset;
+
+            submeshTriangles[currentTriangleArrayIndex][9] = 4 + segmentIndexOffset;
             submeshTriangles[currentTriangleArrayIndex][10] = 7 + segmentIndexOffset;
-            submeshTriangles[currentTriangleArrayIndex][11] = 6 + segmentIndexOffset;
-
-            submeshTriangles[currentTriangleArrayIndex][12] = 2 + segmentIndexOffset;
-            submeshTriangles[currentTriangleArrayIndex][13] = 6 + segmentIndexOffset;
-            submeshTriangles[currentTriangleArrayIndex][14] = 1 + segmentIndexOffset;
-
-            submeshTriangles[currentTriangleArrayIndex][15] = 1 + segmentIndexOffset;
-            submeshTriangles[currentTriangleArrayIndex][16] = 6 + segmentIndexOffset;
-            submeshTriangles[currentTriangleArrayIndex][17] = 5 + segmentIndexOffset;
-
-            submeshTriangles[currentTriangleArrayIndex][18] = 1 + segmentIndexOffset;
-            submeshTriangles[currentTriangleArrayIndex][19] = 5 + segmentIndexOffset;
-            submeshTriangles[currentTriangleArrayIndex][20] = 4 + segmentIndexOffset;
-
-            submeshTriangles[currentTriangleArrayIndex][21] = 0 + segmentIndexOffset;
-            submeshTriangles[currentTriangleArrayIndex][22] = 1 + segmentIndexOffset;
-            submeshTriangles[currentTriangleArrayIndex][23] = 4 + segmentIndexOffset;
-            #endregion
-
-            #region Segment Top Triangles
-            submeshTriangles[currentTriangleArrayIndex][24] = 4 + segmentIndexOffset;
-            submeshTriangles[currentTriangleArrayIndex][25] = 8 + segmentIndexOffset;
-            submeshTriangles[currentTriangleArrayIndex][26] = 7 + segmentIndexOffset;
-
-            submeshTriangles[currentTriangleArrayIndex][27] = 7 + segmentIndexOffset;
-            submeshTriangles[currentTriangleArrayIndex][28] = 8 + segmentIndexOffset;
-            submeshTriangles[currentTriangleArrayIndex][29] = 11 + segmentIndexOffset;
-
-            submeshTriangles[currentTriangleArrayIndex][30] = 6 + segmentIndexOffset;
-            submeshTriangles[currentTriangleArrayIndex][31] = 7 + segmentIndexOffset;
-            submeshTriangles[currentTriangleArrayIndex][32] = 11 + segmentIndexOffset;
-
-            submeshTriangles[currentTriangleArrayIndex][33] = 6 + segmentIndexOffset;
-            submeshTriangles[currentTriangleArrayIndex][34] = 11 + segmentIndexOffset;
-            submeshTriangles[currentTriangleArrayIndex][35] = 10 + segmentIndexOffset;
-
-            submeshTriangles[currentTriangleArrayIndex][36] = 6 + segmentIndexOffset;
-            submeshTriangles[currentTriangleArrayIndex][37] = 10 + segmentIndexOffset;
-            submeshTriangles[currentTriangleArrayIndex][38] = 5 + segmentIndexOffset;
-
-            submeshTriangles[currentTriangleArrayIndex][39] = 5 + segmentIndexOffset;
-            submeshTriangles[currentTriangleArrayIndex][40] = 10 + segmentIndexOffset;
-            submeshTriangles[currentTriangleArrayIndex][41] = 9 + segmentIndexOffset;
-
-            submeshTriangles[currentTriangleArrayIndex][42] = 5 + segmentIndexOffset;
-            submeshTriangles[currentTriangleArrayIndex][43] = 9 + segmentIndexOffset;
-            submeshTriangles[currentTriangleArrayIndex][44] = 8 + segmentIndexOffset;
-
-            submeshTriangles[currentTriangleArrayIndex][45] = 4 + segmentIndexOffset;
-            submeshTriangles[currentTriangleArrayIndex][46] = 5 + segmentIndexOffset;
-            submeshTriangles[currentTriangleArrayIndex][47] = 8 + segmentIndexOffset;
-
-            submeshTriangles[currentTriangleArrayIndex][48] = 12 + segmentIndexOffset;
-            submeshTriangles[currentTriangleArrayIndex][49] = 9 + segmentIndexOffset;
-            submeshTriangles[currentTriangleArrayIndex][50] = 13 + segmentIndexOffset;
-
-            submeshTriangles[currentTriangleArrayIndex][51] = 13 + segmentIndexOffset;
-            submeshTriangles[currentTriangleArrayIndex][52] = 9 + segmentIndexOffset;
-            submeshTriangles[currentTriangleArrayIndex][53] = 10 + segmentIndexOffset;
-            #endregion
+            submeshTriangles[currentTriangleArrayIndex][11] = 5 + segmentIndexOffset;
 
             uvs.Add(new Vector2(0, 0));
             uvs.Add(new Vector2(segmentWidth, 0));
+            uvs.Add(new Vector2(0, segmentMiddleLowerLeft.y));
+            uvs.Add(new Vector2(segmentWidth, segmentMiddleLowerLeft.y));
+
+            //Back Face
+            vertices[8 + segmentIndexOffset] = segmentBaseUpperRight + segmentOffset;
+            vertices[9 + segmentIndexOffset] = segmentBaseUpperLeft + segmentOffset;
+            vertices[10 + segmentIndexOffset] = segmentMiddleUpperRight + segmentOffset;
+            vertices[11 + segmentIndexOffset] = segmentMiddleUpperLeft + segmentOffset;
+
+            submeshTriangles[currentTriangleArrayIndex][12] = 8 + segmentIndexOffset;
+            submeshTriangles[currentTriangleArrayIndex][13] = 10 + segmentIndexOffset;
+            submeshTriangles[currentTriangleArrayIndex][14] = 11 + segmentIndexOffset;
+
+            submeshTriangles[currentTriangleArrayIndex][15] = 8 + segmentIndexOffset;
+            submeshTriangles[currentTriangleArrayIndex][16] = 11 + segmentIndexOffset;
+            submeshTriangles[currentTriangleArrayIndex][17] = 9 + segmentIndexOffset;
+
+            uvs.Add(new Vector2(0, 0));
+            uvs.Add(new Vector2(trackTotalWidth, 0));
+            uvs.Add(new Vector2(0, segmentMiddleLowerLeft.y));
+            uvs.Add(new Vector2(trackTotalWidth, segmentMiddleLowerLeft.y));
+
+            //Left Face
+            vertices[12 + segmentIndexOffset] = segmentBaseUpperLeft + segmentOffset;
+            vertices[13 + segmentIndexOffset] = segmentBaseLowerLeft + segmentOffset;
+            vertices[14 + segmentIndexOffset] = segmentMiddleUpperLeft + segmentOffset;
+            vertices[15 + segmentIndexOffset] = segmentMiddleLowerLeft + segmentOffset;
+
+            submeshTriangles[currentTriangleArrayIndex][18] = 12 + segmentIndexOffset;
+            submeshTriangles[currentTriangleArrayIndex][19] = 14 + segmentIndexOffset;
+            submeshTriangles[currentTriangleArrayIndex][20] = 15 + segmentIndexOffset;
+
+            submeshTriangles[currentTriangleArrayIndex][21] = 12 + segmentIndexOffset;
+            submeshTriangles[currentTriangleArrayIndex][22] = 15 + segmentIndexOffset;
+            submeshTriangles[currentTriangleArrayIndex][23] = 13 + segmentIndexOffset;
+
             uvs.Add(new Vector2(0, 0));
             uvs.Add(new Vector2(segmentWidth, 0));
+            uvs.Add(new Vector2(0, segmentMiddleLowerLeft.y));
+            uvs.Add(new Vector2(segmentWidth, segmentMiddleLowerLeft.y));
 
-            uvs.Add(new Vector2(0, segmentBaseHeightOffset.y));
-            uvs.Add(new Vector2(segmentWidth, segmentBaseHeightOffset.y));
-            uvs.Add(new Vector2(0, segmentBaseHeightOffset.y));
-            uvs.Add(new Vector2(segmentWidth, segmentBaseHeightOffset.y));
+            #endregion
+
+            #region Segment Top
 
             float segmentTopAslantHeight = Vector3.Distance(segmentTopLowerLeft, segmentMiddleLowerLeft);
+            float segmentTopSideWidth = Vector3.Distance(segmentTopLowerLeft, segmentTopUpperLeft);
             float segmentTopUVOffset = segmentBaseHeightOffset.y + segmentTopAslantHeight;
-            uvs.Add(new Vector2(0, segmentTopUVOffset));
-            uvs.Add(new Vector2(segmentWidth, segmentTopUVOffset));
-            uvs.Add(new Vector2(0, segmentTopUVOffset));
-            uvs.Add(new Vector2(segmentWidth, segmentTopUVOffset));
 
-            float segmentRoofUVOffset = segmentTopUVOffset + Vector3.Distance(segmentTopLowerLeft, segmentTopUpperLeft);
-            uvs.Add(new Vector2(0, segmentRoofUVOffset));
-            uvs.Add(new Vector2(segmentWidth, segmentRoofUVOffset));
+            //Front Face
+            vertices[16 + segmentIndexOffset] = segmentMiddleLowerLeft + segmentOffset;
+            vertices[17 + segmentIndexOffset] = segmentMiddleLowerRight + segmentOffset;
+            vertices[18 + segmentIndexOffset] = segmentTopLowerLeft + segmentOffset;
+            vertices[19 + segmentIndexOffset] = segmentTopLowerRight + segmentOffset;
+
+            submeshTriangles[currentTriangleArrayIndex][24] = 16 + segmentIndexOffset;
+            submeshTriangles[currentTriangleArrayIndex][25] = 18 + segmentIndexOffset;
+            submeshTriangles[currentTriangleArrayIndex][26] = 19 + segmentIndexOffset;
+
+            submeshTriangles[currentTriangleArrayIndex][27] = 16 + segmentIndexOffset;
+            submeshTriangles[currentTriangleArrayIndex][28] = 19 + segmentIndexOffset;
+            submeshTriangles[currentTriangleArrayIndex][29] = 17 + segmentIndexOffset;
+
+            uvs.Add(new Vector2(0, 0));
+            uvs.Add(new Vector2(trackTotalWidth, 0));
+            uvs.Add(new Vector2(0, segmentTopAslantHeight));
+            uvs.Add(new Vector2(trackTotalWidth, segmentTopAslantHeight));
+
+            //Right Face
+            vertices[20 + segmentIndexOffset] = segmentMiddleLowerRight + segmentOffset;
+            vertices[21 + segmentIndexOffset] = segmentMiddleUpperRight + segmentOffset;
+            vertices[22 + segmentIndexOffset] = segmentTopLowerRight + segmentOffset;
+            vertices[23 + segmentIndexOffset] = segmentTopUpperRight + segmentOffset;
+
+            submeshTriangles[currentTriangleArrayIndex][30] = 20 + segmentIndexOffset;
+            submeshTriangles[currentTriangleArrayIndex][31] = 22 + segmentIndexOffset;
+            submeshTriangles[currentTriangleArrayIndex][32] = 23 + segmentIndexOffset;
+
+            submeshTriangles[currentTriangleArrayIndex][33] = 20 + segmentIndexOffset;
+            submeshTriangles[currentTriangleArrayIndex][34] = 23 + segmentIndexOffset;
+            submeshTriangles[currentTriangleArrayIndex][35] = 21 + segmentIndexOffset;
+
+            uvs.Add(new Vector2(0, 0));
+            uvs.Add(new Vector2(segmentWidth, 0));
+            uvs.Add(new Vector2((segmentWidth - segmentTopSideWidth) / 2, segmentTopAslantHeight));
+            uvs.Add(new Vector2(segmentTopSideWidth + (segmentWidth - segmentTopSideWidth) / 2, segmentTopAslantHeight));
+
+            //Back Face
+            vertices[24 + segmentIndexOffset] = segmentMiddleUpperRight + segmentOffset;
+            vertices[25 + segmentIndexOffset] = segmentMiddleUpperLeft + segmentOffset;
+            vertices[26 + segmentIndexOffset] = segmentTopUpperRight + segmentOffset;
+            vertices[27 + segmentIndexOffset] = segmentTopUpperLeft + segmentOffset;
+
+            submeshTriangles[currentTriangleArrayIndex][36] = 24 + segmentIndexOffset;
+            submeshTriangles[currentTriangleArrayIndex][37] = 26 + segmentIndexOffset;
+            submeshTriangles[currentTriangleArrayIndex][38] = 27 + segmentIndexOffset;
+
+            submeshTriangles[currentTriangleArrayIndex][39] = 24 + segmentIndexOffset;
+            submeshTriangles[currentTriangleArrayIndex][40] = 27 + segmentIndexOffset;
+            submeshTriangles[currentTriangleArrayIndex][41] = 25 + segmentIndexOffset;
+
+            uvs.Add(new Vector2(0, 0));
+            uvs.Add(new Vector2(trackTotalWidth, 0));
+            uvs.Add(new Vector2(0, segmentTopAslantHeight));
+            uvs.Add(new Vector2(trackTotalWidth, segmentTopAslantHeight));
+
+            //Left Face
+            vertices[28 + segmentIndexOffset] = segmentMiddleUpperLeft + segmentOffset;
+            vertices[29 + segmentIndexOffset] = segmentMiddleLowerLeft + segmentOffset;
+            vertices[30 + segmentIndexOffset] = segmentTopUpperLeft + segmentOffset;
+            vertices[31 + segmentIndexOffset] = segmentTopLowerLeft + segmentOffset;
+
+            submeshTriangles[currentTriangleArrayIndex][42] = 28 + segmentIndexOffset;
+            submeshTriangles[currentTriangleArrayIndex][43] = 30 + segmentIndexOffset;
+            submeshTriangles[currentTriangleArrayIndex][44] = 31 + segmentIndexOffset;
+
+            submeshTriangles[currentTriangleArrayIndex][45] = 28 + segmentIndexOffset;
+            submeshTriangles[currentTriangleArrayIndex][46] = 31 + segmentIndexOffset;
+            submeshTriangles[currentTriangleArrayIndex][47] = 29 + segmentIndexOffset;
+
+            uvs.Add(new Vector2(0, 0));
+            uvs.Add(new Vector2(segmentWidth, 0));
+            uvs.Add(new Vector2((segmentWidth - segmentTopSideWidth) / 2, segmentTopAslantHeight));
+            uvs.Add(new Vector2(segmentTopSideWidth + (segmentWidth - segmentTopSideWidth) / 2, segmentTopAslantHeight));
+
+            //Top Face
+            vertices[32 + segmentIndexOffset] = segmentTopLowerLeft + segmentOffset;
+            vertices[33 + segmentIndexOffset] = segmentTopLowerRight + segmentOffset;
+            vertices[34 + segmentIndexOffset] = segmentTopUpperLeft + segmentOffset;
+            vertices[35 + segmentIndexOffset] = segmentTopUpperRight + segmentOffset;
+
+            submeshTriangles[currentTriangleArrayIndex][48] = 32 + segmentIndexOffset;
+            submeshTriangles[currentTriangleArrayIndex][49] = 34 + segmentIndexOffset;
+            submeshTriangles[currentTriangleArrayIndex][50] = 35 + segmentIndexOffset;
+
+            submeshTriangles[currentTriangleArrayIndex][51] = 32 + segmentIndexOffset;
+            submeshTriangles[currentTriangleArrayIndex][52] = 35 + segmentIndexOffset;
+            submeshTriangles[currentTriangleArrayIndex][53] = 33 + segmentIndexOffset;
+
+            uvs.Add(new Vector2(0, 0));
+            uvs.Add(new Vector2(trackTotalWidth, 0));
+            uvs.Add(new Vector2(0, segmentTopSideWidth));
+            uvs.Add(new Vector2(trackTotalWidth, segmentTopSideWidth));
+
+            #endregion
+
+            //vertices[4 + segmentIndexOffset] = segmentMiddleLowerLeft + segmentOffset;
+            //vertices[5 + segmentIndexOffset] = segmentMiddleUpperLeft + segmentOffset;
+            //vertices[6 + segmentIndexOffset] = segmentMiddleUpperRight + segmentOffset;
+            //vertices[7 + segmentIndexOffset] = segmentMiddleLowerRight + segmentOffset;
+
+            //vertices[8 + segmentIndexOffset] = segmentTopLowerLeft + segmentOffset;
+            //vertices[9 + segmentIndexOffset] = segmentTopUpperLeft + segmentOffset;
+            //vertices[10 + segmentIndexOffset] = segmentTopUpperRight + segmentOffset;
+            //vertices[11 + segmentIndexOffset] = segmentTopLowerRight + segmentOffset;
+
+            //vertices[12 + segmentIndexOffset] = vertices[8 + segmentIndexOffset];
+            //vertices[13 + segmentIndexOffset] = vertices[11 + segmentIndexOffset];
+
+            //vertices[14 + segmentIndexOffset] = vertices[4 + segmentIndexOffset];
+            //vertices[15 + segmentIndexOffset] = vertices[0 + segmentIndexOffset];
+
+            //vertices[16 + segmentIndexOffset] = vertices[6 + segmentIndexOffset];
+            //vertices[17 + segmentIndexOffset] = vertices[2 + segmentIndexOffset];
+
+            //#region Segment Base Triangles
+            //submeshTriangles[currentTriangleArrayIndex][0] = 15 + segmentIndexOffset;
+            //submeshTriangles[currentTriangleArrayIndex][1] = 14 + segmentIndexOffset;
+            //submeshTriangles[currentTriangleArrayIndex][2] = 3 + segmentIndexOffset;
+
+            //submeshTriangles[currentTriangleArrayIndex][3] = 3 + segmentIndexOffset;
+            //submeshTriangles[currentTriangleArrayIndex][4] = 4 + segmentIndexOffset;
+            //submeshTriangles[currentTriangleArrayIndex][5] = 7 + segmentIndexOffset;
+
+            //submeshTriangles[currentTriangleArrayIndex][6] = 3 + segmentIndexOffset;
+            //submeshTriangles[currentTriangleArrayIndex][7] = 7 + segmentIndexOffset;
+            //submeshTriangles[currentTriangleArrayIndex][8] = 2 + segmentIndexOffset;
+
+            //submeshTriangles[currentTriangleArrayIndex][9] = 2 + segmentIndexOffset;
+            //submeshTriangles[currentTriangleArrayIndex][10] = 7 + segmentIndexOffset;
+            //submeshTriangles[currentTriangleArrayIndex][11] = 6 + segmentIndexOffset;
+
+            //submeshTriangles[currentTriangleArrayIndex][12] = 2 + segmentIndexOffset;
+            //submeshTriangles[currentTriangleArrayIndex][13] = 6 + segmentIndexOffset;
+            //submeshTriangles[currentTriangleArrayIndex][14] = 1 + segmentIndexOffset;
+
+            //submeshTriangles[currentTriangleArrayIndex][15] = 1 + segmentIndexOffset;
+            //submeshTriangles[currentTriangleArrayIndex][16] = 6 + segmentIndexOffset;
+            //submeshTriangles[currentTriangleArrayIndex][17] = 5 + segmentIndexOffset;
+
+            //submeshTriangles[currentTriangleArrayIndex][18] = 1 + segmentIndexOffset;
+            //submeshTriangles[currentTriangleArrayIndex][19] = 5 + segmentIndexOffset;
+            //submeshTriangles[currentTriangleArrayIndex][20] = 4 + segmentIndexOffset;
+
+            //submeshTriangles[currentTriangleArrayIndex][21] = 0 + segmentIndexOffset;
+            //submeshTriangles[currentTriangleArrayIndex][22] = 1 + segmentIndexOffset;
+            //submeshTriangles[currentTriangleArrayIndex][23] = 4 + segmentIndexOffset;
+            //#endregion
+
+            //#region Segment Top Triangles
+            //submeshTriangles[currentTriangleArrayIndex][24] = 4 + segmentIndexOffset;
+            //submeshTriangles[currentTriangleArrayIndex][25] = 8 + segmentIndexOffset;
+            //submeshTriangles[currentTriangleArrayIndex][26] = 7 + segmentIndexOffset;
+
+            //submeshTriangles[currentTriangleArrayIndex][27] = 7 + segmentIndexOffset;
+            //submeshTriangles[currentTriangleArrayIndex][28] = 8 + segmentIndexOffset;
+            //submeshTriangles[currentTriangleArrayIndex][29] = 11 + segmentIndexOffset;
+
+            //submeshTriangles[currentTriangleArrayIndex][30] = 6 + segmentIndexOffset;
+            //submeshTriangles[currentTriangleArrayIndex][31] = 7 + segmentIndexOffset;
+            //submeshTriangles[currentTriangleArrayIndex][32] = 11 + segmentIndexOffset;
+
+            //submeshTriangles[currentTriangleArrayIndex][33] = 6 + segmentIndexOffset;
+            //submeshTriangles[currentTriangleArrayIndex][34] = 11 + segmentIndexOffset;
+            //submeshTriangles[currentTriangleArrayIndex][35] = 10 + segmentIndexOffset;
+
+            //submeshTriangles[currentTriangleArrayIndex][36] = 6 + segmentIndexOffset;
+            //submeshTriangles[currentTriangleArrayIndex][37] = 10 + segmentIndexOffset;
+            //submeshTriangles[currentTriangleArrayIndex][38] = 5 + segmentIndexOffset;
+
+            //submeshTriangles[currentTriangleArrayIndex][39] = 5 + segmentIndexOffset;
+            //submeshTriangles[currentTriangleArrayIndex][40] = 10 + segmentIndexOffset;
+            //submeshTriangles[currentTriangleArrayIndex][41] = 9 + segmentIndexOffset;
+
+            //submeshTriangles[currentTriangleArrayIndex][42] = 5 + segmentIndexOffset;
+            //submeshTriangles[currentTriangleArrayIndex][43] = 9 + segmentIndexOffset;
+            //submeshTriangles[currentTriangleArrayIndex][44] = 8 + segmentIndexOffset;
+
+            //submeshTriangles[currentTriangleArrayIndex][45] = 4 + segmentIndexOffset;
+            //submeshTriangles[currentTriangleArrayIndex][46] = 5 + segmentIndexOffset;
+            //submeshTriangles[currentTriangleArrayIndex][47] = 8 + segmentIndexOffset;
+
+            //submeshTriangles[currentTriangleArrayIndex][48] = 12 + segmentIndexOffset;
+            //submeshTriangles[currentTriangleArrayIndex][49] = 9 + segmentIndexOffset;
+            //submeshTriangles[currentTriangleArrayIndex][50] = 13 + segmentIndexOffset;
+
+            //submeshTriangles[currentTriangleArrayIndex][51] = 13 + segmentIndexOffset;
+            //submeshTriangles[currentTriangleArrayIndex][52] = 9 + segmentIndexOffset;
+            //submeshTriangles[currentTriangleArrayIndex][53] = 10 + segmentIndexOffset;
+            //#endregion
+
+            //uvs.Add(new Vector2(0, 0));
+            //uvs.Add(new Vector2(trackTotalWidth, 0));
+            //uvs.Add(new Vector2(0, 0));
+            //uvs.Add(new Vector2(trackTotalWidth, 0));
+
+            //uvs.Add(new Vector2(0, segmentBaseHeightOffset.y));
+            //uvs.Add(new Vector2(trackTotalWidth, segmentBaseHeightOffset.y));
+            //uvs.Add(new Vector2(0, segmentBaseHeightOffset.y));
+            //uvs.Add(new Vector2(trackTotalWidth, segmentBaseHeightOffset.y));
+
+            //float segmentTopAslantHeight = Vector3.Distance(segmentTopLowerLeft, segmentMiddleLowerLeft);
+            //float segmentTopUVOffset = segmentBaseHeightOffset.y + segmentTopAslantHeight;
+            //uvs.Add(new Vector2(0, segmentTopUVOffset));
+            //uvs.Add(new Vector2(trackTotalWidth, segmentTopUVOffset));
+            //uvs.Add(new Vector2(0, segmentTopUVOffset));
+            //uvs.Add(new Vector2(trackTotalWidth, segmentTopUVOffset));
+
+            //float segmentRoofUVOffset = segmentTopUVOffset + Vector3.Distance(segmentTopLowerLeft, segmentTopUpperLeft);
+            //uvs.Add(new Vector2(0, segmentRoofUVOffset));
+            //uvs.Add(new Vector2(trackTotalWidth, segmentRoofUVOffset));
         }
         #endregion
 
