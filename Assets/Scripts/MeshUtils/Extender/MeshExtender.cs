@@ -6,8 +6,5 @@ public abstract class MeshExtender
 {
     public MeshExtensionMode ExtensionMode;
 
-    public ConstructedProceduralMesh ConstructMesh(MeshBase meshBase)
-    {
-
-    }
+    public abstract ConstructedProceduralMesh ConstructMesh(MeshBase meshBase);
 }

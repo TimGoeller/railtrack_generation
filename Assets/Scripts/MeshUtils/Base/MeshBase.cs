@@ -5,11 +5,11 @@ using UnityEngine;
 
 public abstract class MeshBase
 {
-    public List<Vector3> BaseVertices;
+    public LinkedList<Vector3> BaseVertices;
     public MeshExtender Extender;
 
-    public ConstructedProceduralMesh ConstructMesh()
+    public virtual ConstructedProceduralMesh ConstructMesh()
     {
-        Extender.ConstructMesh(this);
+        return Extender.ConstructMesh(this);
     }
 }
