@@ -3,18 +3,18 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-[CustomEditor(typeof(RailTrack))]
+[CustomEditor(typeof(NewRailTrack))]
 public class RailTrackEditor : Editor
 {
     #region Attributes
-    RailTrack railTrack;
+    NewRailTrack railTrack;
 
     bool trackSettingsFoldout, segmentSettingsFoldout, trackLineSettingsFoldout;
     #endregion
 
     private void Awake()
     {
-        railTrack = target as RailTrack;
+        railTrack = target as NewRailTrack;
     }
 
     public override void OnInspectorGUI()
