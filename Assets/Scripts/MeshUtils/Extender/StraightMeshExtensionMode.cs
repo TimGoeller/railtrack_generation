@@ -9,4 +9,9 @@ public class StraightExtensionMode : MeshExtensionMode
     {
         this.length = length;
     }
+
+    public override Vector3 ExtendPoint(Vector3 originalPoint, Vector3 center)
+    {
+        return center;
+    }
 }

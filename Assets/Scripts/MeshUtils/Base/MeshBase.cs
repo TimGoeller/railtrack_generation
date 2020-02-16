@@ -8,6 +8,8 @@ public abstract class MeshBase
     public LinkedList<Vector3> BaseVertices;
     public MeshExtender Extender;
 
+    public Vector3 midPoint, normalizedDirection;
+
     public virtual ConstructedProceduralMesh ConstructMesh()
     {
         return Extender.ConstructMesh(this);
