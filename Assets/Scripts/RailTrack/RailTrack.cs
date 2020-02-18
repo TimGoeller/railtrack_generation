@@ -79,7 +79,15 @@ public class RailTrack : MonoBehaviour
         newTrackSegmentGameObject.transform.localPosition = Vector3.zero;
         RailTrackSegment trackSegment = newTrackSegmentGameObject.GetComponent<RailTrackSegment>();
         trackSegment.Initialize(new TrackConnectionPoint(Vector3.zero, Vector3.forward),
-            new TrackConnectionPoint(Vector3.forward * 20 + Vector3.left * 3, Vector3.forward));
+            new TrackConnectionPoint(Vector3.forward * 20 + Vector3.left * 3, Vector3.forward), 
+            new RailTrackSegment.SegmentSettings()
+            {
+                SegmentCutoutHeightPercentage = segmentCutoutHeightPercentage,
+                SegmentCutoutWidthPercentage = segmentCutoutWidthPercentage,
+                SegmentHeight = segmentHeight,
+                SegmentWidth = segmentWidth,
+                SegmentLength = trackTotalWidth
+            });
         segments.AddLast(trackSegment);
     }
 }
