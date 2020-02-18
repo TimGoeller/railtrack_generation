@@ -3,18 +3,18 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-[CustomEditor(typeof(NewRailTrack))]
+[CustomEditor(typeof(RailTrack))]
 public class RailTrackEditor : Editor
 {
     #region Attributes
-    NewRailTrack railTrack;
+    RailTrack railTrack;
 
     bool trackSettingsFoldout, segmentSettingsFoldout, trackLineSettingsFoldout;
     #endregion
 
     private void Awake()
     {
-        railTrack = target as NewRailTrack;
+        railTrack = target as RailTrack;
     }
 
     public override void OnInspectorGUI()
@@ -49,5 +49,33 @@ public class RailTrackEditor : Editor
             railTrack.CreateMesh();
         }
 
+    }
+
+    void OnSceneGUI()
+    {
+        if (railTrack.segments.Count == 0)
+        {
+            railTrack.Initialize();
+        }
+        //DrawHandleOnPlane();
+    }
+
+    static Plane XZPlane = new Plane(Vector3.up, Vector3.zero);
+
+    void DrawHandleOnPlane()
+    {
+        Event guiEvent = Event.current;
+        Vector2 mousePos = HandleUtility.GUIPointToWorldRay(guiEvent.mousePosition).origin;
+        // Undo.RecordObject(creator, "Add segment");
+        float distance;
+        Ray ray = HandleUtility.GUIPointToWorldRay(guiEvent.mousePosition);
+        if (XZPlane.Raycast(ray, out distance))
+        {
+            Vector3 hitPoint = ray.GetPoint(distance);
+            //Just double check to ensure the y position is exactly zero
+            hitPoint.y = 0;
+            Handles.SphereHandleCap(0, hitPoint, Quaternion.identity, 1f, EventType.Repaint);
+
+        }
     }
 }
