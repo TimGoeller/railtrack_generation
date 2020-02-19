@@ -136,7 +136,8 @@ public class RailTrackSegment : MonoBehaviour
             RailHeight = trackSettings.TrackHeight,
             RailWidth = trackSettings.TrackWidth,
             RailSegments = leftTrackNodes,
-            RailSegmentVerticalNormals = RailSegmentVerticalNormals
+            RailSegmentVerticalNormals = RailSegmentVerticalNormals,
+            RailMidPercentage = trackSettings.TrackMidPercentage
         }.ConstructMesh());
 
         trackMesh.AddMesh(new RailConstructor
