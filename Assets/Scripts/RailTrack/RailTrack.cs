@@ -16,6 +16,7 @@ public class RailTrack : MonoBehaviour
     public float trackOffsetPercentage = 0.175f;
     public float segmentCutoutWidthPercentage = 0.30f;
     public float segmentCutoutHeightPercentage = 0.65f;
+    public float trackMidPercentage = 0.7f;
 
     public LinkedList<RailTrackSegment> segments = new LinkedList<RailTrackSegment>();
 
@@ -26,49 +27,7 @@ public class RailTrack : MonoBehaviour
 
     public void CreateMesh()
     {
-        //#region Initialization
-        //if (!meshFilter)
-        //    meshFilter = GetComponent<MeshFilter>();
-
-
-        //if (!meshRenderer)
-        //    meshRenderer = GetComponent<MeshRenderer>();
-
-        //mesh = meshFilter.sharedMesh;
-
-        //if (!mesh)
-        //{
-        //    mesh = new Mesh();
-        //    mesh.name = "Track";
-        //}
-
-        //#endregion
-
-        //ConstructedProceduralMesh procMesh = new RailSegmentConstructor
-        //{
-        //    Base = new Quad()
-        //    {
-        //        LowerLeft = new Vector3(0, 0, 0),
-        //        UpperLeft = new Vector3(0, 0, segmentWidth),
-        //        UpperRight = new Vector3(trackTotalWidth, 0, segmentWidth),
-        //        LowerRight = new Vector3(trackTotalWidth, 0 ,0)
-        //    },
-        //    Height = segmentHeight,
-        //    HeightCutoutPercentage = segmentCutoutHeightPercentage,
-        //    LengthCutoutPercentage = segmentCutoutWidthPercentage
-        //}.ConstructMesh();
-
-        //mesh.Clear();
-        //mesh.vertices = procMesh.Vertices;
-        //mesh.triangles = procMesh.Triangles;
-
-        //mesh.SetUVs(0, procMesh.UVs);
-
-        //mesh.RecalculateNormals();
-        //mesh.RecalculateBounds();
-        //mesh.RecalculateTangents();
-
-        //meshFilter.sharedMesh = mesh;
+  
 
     }
 
@@ -87,6 +46,13 @@ public class RailTrack : MonoBehaviour
                 SegmentHeight = segmentHeight,
                 SegmentWidth = segmentWidth,
                 SegmentLength = trackTotalWidth
+            },
+            new RailTrackSegment.TrackSettings()
+            {
+                TrackHeight = trackHeight,
+                TrackOffsetPercentage = trackOffsetPercentage,
+                TrackWidth = trackWidth,
+                TrackMidPercentage = trackMidPercentage
             });
         segments.AddLast(trackSegment);
     }

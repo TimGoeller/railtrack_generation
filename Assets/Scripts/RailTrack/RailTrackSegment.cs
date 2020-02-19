@@ -38,15 +38,15 @@ public class RailTrackSegment : MonoBehaviour
         }
     }
 
-    public void Initialize(TrackConnectionPoint start, TrackConnectionPoint end, SegmentSettings settings)
+    public void Initialize(TrackConnectionPoint start, TrackConnectionPoint end, SegmentSettings settings, TrackSettings trackSettings)
     {
         Curve = new RailCurve(start, end, start.NormalizedDirection * (end.Point - start.Point).magnitude * 0.9f);
         samples = Curve.CalculateSegmentPoints(0.5f, settings.SegmentWidth, false);
-        CreateMesh(samples, settings);
+        CreateMesh(samples, settings, trackSettings);
     }
 
 
-    public void CreateMesh(List<Vector3> samples, SegmentSettings settings)
+    public void CreateMesh(List<Vector3> samples, SegmentSettings settings, TrackSettings trackSettings)
     {
         #region Initialization
         if (!meshFilter)
@@ -67,6 +67,9 @@ public class RailTrackSegment : MonoBehaviour
 
         ConstructedProceduralMesh segmentMesh = new ConstructedProceduralMesh();
 
+        List<Vector3> RailSegmentVerticalNormals = new List<Vector3>();
+        List<Vector3> NextSegmentVectors = new List<Vector3>();
+
         int sampleIndex = 0;
         foreach (Vector3 sample in samples)
         {
@@ -81,7 +84,10 @@ public class RailTrackSegment : MonoBehaviour
             }
 
             vectorToNextSample = vectorToNextSample.normalized;
+            NextSegmentVectors.Add(vectorToNextSample);
             Vector3 rotatedVector = (Quaternion.AngleAxis(90, Vector3.up) * vectorToNextSample).normalized;
+
+            RailSegmentVerticalNormals.Add(rotatedVector);
 
             segmentMesh.AddMesh(
                 new RailSegmentConstructor {
@@ -99,12 +105,71 @@ public class RailTrackSegment : MonoBehaviour
                 );
         }
 
+        List<Vector3> leftTrackNodes = new List<Vector3>();
+        List<Vector3> rightTrackNodes = new List<Vector3>();
+
+        int index = 0;
+        foreach (Vector3 sample in samples)
+        {
+            leftTrackNodes.Add(
+                (sample - (settings.SegmentLength / 2) 
+                 * RailSegmentVerticalNormals[index] 
+                 * (1 - trackSettings.TrackOffsetPercentage))
+                 + new Vector3(0, settings.SegmentHeight, 0)
+                 + NextSegmentVectors[index] * (settings.SegmentWidth / 2)
+                );
+
+            rightTrackNodes.Add(
+                (sample + (settings.SegmentLength / 2)
+                 * RailSegmentVerticalNormals[index]
+                 * (1 - trackSettings.TrackOffsetPercentage))
+                + new Vector3(0, settings.SegmentHeight, 0)
+                + NextSegmentVectors[index] * (settings.SegmentWidth / 2)
+            );
+            index++;
+        }
+
+        ConstructedProceduralMesh trackMesh = new ConstructedProceduralMesh();
+
+        trackMesh.AddMesh(new RailConstructor
+        {
+            RailHeight = trackSettings.TrackHeight,
+            RailWidth = trackSettings.TrackWidth,
+            RailSegments = leftTrackNodes,
+            RailSegmentVerticalNormals = RailSegmentVerticalNormals
+        }.ConstructMesh());
+
+        trackMesh.AddMesh(new RailConstructor
+        {
+            RailHeight = trackSettings.TrackHeight,
+            RailWidth = trackSettings.TrackWidth,
+            RailSegments = rightTrackNodes,
+            RailSegmentVerticalNormals = RailSegmentVerticalNormals,
+            RailMidPercentage = trackSettings.TrackMidPercentage
+        }.ConstructMesh());
+
+        SubmeshConstructor constructor = new SubmeshConstructor(
+            new List<ConstructedProceduralMesh>() {segmentMesh, trackMesh});
 
         mesh.Clear();
-        mesh.vertices = segmentMesh.Vertices;
-        mesh.triangles = segmentMesh.Triangles;
+        mesh.vertices = constructor.Vertices;
+        mesh.subMeshCount = constructor.SubmeshTriangles.Length;
 
-        mesh.SetUVs(0, segmentMesh.UVs);
+        int triangleIndex = 0;
+        foreach (int[] triangles in constructor.SubmeshTriangles)
+        {
+            mesh.SetTriangles(triangles, triangleIndex);
+            triangleIndex++;
+        }
+
+        mesh.SetUVs(0, constructor.UVs);
+
+        Material[] materials = new Material[2];
+
+        materials[0] = Resources.Load<Material>("Materials/segment");
+        materials[1] = Resources.Load<Material>("Materials/metal");
+
+        meshRenderer.materials = materials;
 
         mesh.RecalculateNormals();
         mesh.RecalculateBounds();
@@ -120,6 +185,14 @@ public class RailTrackSegment : MonoBehaviour
         public float SegmentLength;
         public float SegmentCutoutHeightPercentage;
         public float SegmentCutoutWidthPercentage;
+    }
+
+    public struct TrackSettings
+    {
+        public float TrackHeight;
+        public float TrackWidth;
+        public float TrackOffsetPercentage;
+        public float TrackMidPercentage;
     }
 
     public struct RailCurve
