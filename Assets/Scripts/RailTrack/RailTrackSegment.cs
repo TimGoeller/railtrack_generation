@@ -61,7 +61,8 @@ public class RailTrackSegment : MonoBehaviour
 
     public void RecreateMesh(SegmentSettings settings, TrackSettings trackSettings)
     {
-        //Curve.BezierHandle = (Curve.End.Point - Curve.End.Point).magnitude * 0.5f; //TODO Move to Curve Setter
+        Curve.BezierHandle = Curve.Start.Point +
+                             Curve.Start.NormalizedDirection * (Curve.End.Point - Curve.Start.Point).magnitude ;
         samples = Curve.CalculateSegmentPoints(0.5f, settings.SegmentWidth, false);
         CreateMesh(samples, settings, trackSettings);
     }

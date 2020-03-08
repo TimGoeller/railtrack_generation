@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using UnityEngine.UIElements;
 
 [CustomEditor(typeof(RailTrack))]
 public class RailTrackEditor : Editor
@@ -9,6 +10,8 @@ public class RailTrackEditor : Editor
     RailTrack railTrack;
 
     bool trackSettingsFoldout, segmentSettingsFoldout, trackLineSettingsFoldout;
+
+    private bool leftMouseHeldDown;
 
     private void Awake()
     {
@@ -51,19 +54,43 @@ public class RailTrackEditor : Editor
 
     void OnSceneGUI()
     {
-        if (railTrack.segments.Count == 0)
+        Event guiEvent = Event.current;
+
+        if (Event.current.type == EventType.MouseDown)
         {
-            railTrack.Initialize();
+            if (guiEvent.button == (int)MouseButton.LeftMouse)
+            {
+                leftMouseHeldDown = true;
+            }
+        }
+        else if (Event.current.type == EventType.MouseUp)
+        {
+            if (guiEvent.button == (int)MouseButton.LeftMouse)
+            {
+                leftMouseHeldDown = false;
+            }
         }
 
         if (railTrack.segments.Count != 0)
         {
             RailTrackSegment lastSegment = railTrack.segments.Last.Value;
-            Vector3 newConnectionPoint = Handles.FreeMoveHandle(lastSegment.GetEndPosition(), Quaternion.identity, .8f,
+            Handles.FreeMoveHandle(lastSegment.GetEndPosition(), Quaternion.identity, .8f,
                 Vector2.zero, Handles.SphereHandleCap);
-            newConnectionPoint.y = 0;
-            if (lastSegment.GetEndPosition() != newConnectionPoint)
-                railTrack.UpdateEnd(newConnectionPoint);
+
+            if (leftMouseHeldDown)
+            {
+                RaycastUtil.XZRaycast raycast = RaycastUtil.VectorToXZPlane(guiEvent.mousePosition);
+
+                if (raycast.Hit)
+                {
+                    if (lastSegment.GetEndPosition() != raycast.HitPoint)
+                        railTrack.UpdateEnd(raycast.HitPoint);
+                }
+            }
+
+
+
+            
         }
 
 
@@ -74,17 +101,6 @@ public class RailTrackEditor : Editor
 
     void DrawHandleOnPlane()
     {
-        Event guiEvent = Event.current;
-        Vector2 mousePos = HandleUtility.GUIPointToWorldRay(guiEvent.mousePosition).origin;
-        // Undo.RecordObject(creator, "Add segment");
-        float distance;
-        Ray ray = HandleUtility.GUIPointToWorldRay(guiEvent.mousePosition);
-        if (XZPlane.Raycast(ray, out distance))
-        {
-            Vector3 hitPoint = ray.GetPoint(distance);
-            //Just double check to ensure the y position is exactly zero
-            hitPoint.y = 0;
-            Handles.SphereHandleCap(0, hitPoint, Quaternion.identity, 1f, EventType.Repaint);
-        }
+        
     }
 }

@@ -30,20 +30,7 @@ public class RailTrack : MonoBehaviour
             new TrackConnectionPoint(end, normalizedTrackDirection),
             SegmentSettings,
             TrackSettings, spaceBetweenSegments);
-    }
-
-    public void Initialize()
-    {
-        //GameObject newTrackSegmentGameObject = new GameObject("Track Segment", typeof(RailTrackSegment));
-        //transform.position = Vector3.zero;
-        //newTrackSegmentGameObject.transform.SetParent(transform);
-        //newTrackSegmentGameObject.transform.localPosition = Vector3.zero;
-        //RailTrackSegment trackSegment = newTrackSegmentGameObject.GetComponent<RailTrackSegment>();
-        //trackSegment.Initialize(new TrackConnectionPoint(Vector3.zero, Vector3.forward),
-        //    new TrackConnectionPoint(Vector3.forward * 20 + Vector3.left * 3, Vector3.forward), 
-        //    SegmentSettings,
-        //    TrackSettings, spaceBetweenSegments);
-        //segments.AddLast(trackSegment);
+        segments.AddLast(firstRailTrackSegment);
     }
 }
 
