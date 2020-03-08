@@ -2,59 +2,48 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(MeshRenderer), typeof(MeshFilter))]
 public class RailTrack : MonoBehaviour
 {
     #region Attributes
-    public float trackTotalWidth = 2.8f;
-    public float trackWidth = 0.08f;
-    public float trackHeight = 0.15f;
-    public float segmentWidth = 0.5f;
-    public float segmentHeight = 0.22f;
-    public int segmentCount = 10;
     public float spaceBetweenSegments = 0.5f;
-    public float trackOffsetPercentage = 0.175f;
-    public float segmentCutoutWidthPercentage = 0.30f;
-    public float segmentCutoutHeightPercentage = 0.65f;
-    public float trackMidPercentage = 0.7f;
+
+    public RailTrackSegment.TrackSettings TrackSettings = new RailTrackSegment.TrackSettings();
+    public RailTrackSegment.SegmentSettings SegmentSettings = new RailTrackSegment.SegmentSettings();
 
     public LinkedList<RailTrackSegment> segments = new LinkedList<RailTrackSegment>();
-
-    MeshFilter meshFilter;
-    MeshRenderer meshRenderer;
-    Mesh mesh;
     #endregion
 
-    public void CreateMesh()
+    public void UpdateEnd(Vector3 connectionPoint)
     {
-  
+        segments.Last.Value.SetEndPosition(connectionPoint);
+        segments.Last.Value.RecreateMesh(SegmentSettings, TrackSettings);
+    }
 
+    public void Initialize(Vector3 start, Vector3 end)
+    {
+        GameObject firstSegmentGO = new GameObject("Track Segment", typeof(RailTrackSegment));
+        firstSegmentGO.transform.SetParent(transform);
+        firstSegmentGO.transform.localPosition = Vector3.zero;
+        RailTrackSegment firstRailTrackSegment = firstSegmentGO.GetComponent<RailTrackSegment>();
+        Vector3 normalizedTrackDirection = (end - start).normalized;
+        firstRailTrackSegment.Initialize(new TrackConnectionPoint(start, normalizedTrackDirection),
+            new TrackConnectionPoint(end, normalizedTrackDirection),
+            SegmentSettings,
+            TrackSettings, spaceBetweenSegments);
     }
 
     public void Initialize()
     {
-        GameObject newTrackSegmentGameObject = new GameObject("Track Segment", typeof(RailTrackSegment));
-        newTrackSegmentGameObject.transform.SetParent(transform);
-        newTrackSegmentGameObject.transform.localPosition = Vector3.zero;
-        RailTrackSegment trackSegment = newTrackSegmentGameObject.GetComponent<RailTrackSegment>();
-        trackSegment.Initialize(new TrackConnectionPoint(Vector3.zero, Vector3.forward),
-            new TrackConnectionPoint(Vector3.forward * 20 + Vector3.left * 3, Vector3.forward), 
-            new RailTrackSegment.SegmentSettings()
-            {
-                SegmentCutoutHeightPercentage = segmentCutoutHeightPercentage,
-                SegmentCutoutWidthPercentage = segmentCutoutWidthPercentage,
-                SegmentHeight = segmentHeight,
-                SegmentWidth = segmentWidth,
-                SegmentLength = trackTotalWidth
-            },
-            new RailTrackSegment.TrackSettings()
-            {
-                TrackHeight = trackHeight,
-                TrackOffsetPercentage = trackOffsetPercentage,
-                TrackWidth = trackWidth,
-                TrackMidPercentage = trackMidPercentage
-            });
-        segments.AddLast(trackSegment);
+        //GameObject newTrackSegmentGameObject = new GameObject("Track Segment", typeof(RailTrackSegment));
+        //transform.position = Vector3.zero;
+        //newTrackSegmentGameObject.transform.SetParent(transform);
+        //newTrackSegmentGameObject.transform.localPosition = Vector3.zero;
+        //RailTrackSegment trackSegment = newTrackSegmentGameObject.GetComponent<RailTrackSegment>();
+        //trackSegment.Initialize(new TrackConnectionPoint(Vector3.zero, Vector3.forward),
+        //    new TrackConnectionPoint(Vector3.forward * 20 + Vector3.left * 3, Vector3.forward), 
+        //    SegmentSettings,
+        //    TrackSettings, spaceBetweenSegments);
+        //segments.AddLast(trackSegment);
     }
 }
 

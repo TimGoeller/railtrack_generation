@@ -18,6 +18,7 @@ public class RailTrackSegment : MonoBehaviour
     MeshFilter meshFilter;
     MeshRenderer meshRenderer;
     Mesh mesh;
+
     private List<Vector3> samples;
 
     public void OnDrawGizmos()
@@ -26,7 +27,7 @@ public class RailTrackSegment : MonoBehaviour
         Gizmos.DrawSphere(Curve.Start.Point + transform.position, 0.1f);
         Gizmos.DrawSphere(Curve.End.Point + transform.position, 0.1f);
         Gizmos.color = Color.red;
-        Gizmos.DrawSphere(Curve.BezierHandle + transform.position, 0.1f);
+        Gizmos.DrawSphere(Curve.BezierHandle + transform.position, 0.2f);
 
         if (samples != null)
         {
@@ -38,10 +39,37 @@ public class RailTrackSegment : MonoBehaviour
         }
     }
 
-    public void Initialize(TrackConnectionPoint start, TrackConnectionPoint end, SegmentSettings settings, TrackSettings trackSettings)
+    public Vector3 GetStartPosition()
     {
-        Curve = new RailCurve(start, end, start.NormalizedDirection * (end.Point - start.Point).magnitude * 0.9f);
+        return Curve.Start.Point;
+    }
+
+    public void SetStartPosition(Vector3 startPosition)
+    {
+        Curve.Start.Point = startPosition;
+    }
+
+    public Vector3 GetEndPosition()
+    {
+        return Curve.End.Point;
+    }
+
+    public void SetEndPosition(Vector3 startPosition)
+    {
+        Curve.End.Point = startPosition;
+    }
+
+    public void RecreateMesh(SegmentSettings settings, TrackSettings trackSettings)
+    {
+        //Curve.BezierHandle = (Curve.End.Point - Curve.End.Point).magnitude * 0.5f; //TODO Move to Curve Setter
         samples = Curve.CalculateSegmentPoints(0.5f, settings.SegmentWidth, false);
+        CreateMesh(samples, settings, trackSettings);
+    }
+
+    public void Initialize(TrackConnectionPoint start, TrackConnectionPoint end, SegmentSettings settings, TrackSettings trackSettings, float spacing)
+    {
+        Curve = new RailCurve(start, end, start.Point + start.NormalizedDirection * (end.Point - start.Point).magnitude * 0.9f);
+        samples = Curve.CalculateSegmentPoints(spacing, settings.SegmentWidth, false);
         CreateMesh(samples, settings, trackSettings);
     }
 
@@ -179,157 +207,22 @@ public class RailTrackSegment : MonoBehaviour
         meshFilter.sharedMesh = mesh;
     }
 
-    public struct SegmentSettings
+    public class SegmentSettings
     {
-        public float SegmentWidth;
-        public float SegmentHeight;
-        public float SegmentLength;
-        public float SegmentCutoutHeightPercentage;
-        public float SegmentCutoutWidthPercentage;
+        public float SegmentWidth = 0.5f;
+        public float SegmentHeight = 0.22f;
+        public float SegmentLength = 2.8f;
+        public float SegmentCutoutHeightPercentage = 0.65f;
+        public float SegmentCutoutWidthPercentage = 0.30f;
     }
 
-    public struct TrackSettings
+    public class TrackSettings
     {
-        public float TrackHeight;
-        public float TrackWidth;
-        public float TrackOffsetPercentage;
-        public float TrackMidPercentage;
+        public float TrackHeight = 0.15f;
+        public float TrackWidth = 0.08f;
+        public float TrackOffsetPercentage = 0.175f;
+        public float TrackMidPercentage = 0.7f;
     }
 
-    public struct RailCurve
-    {
-        public TrackConnectionPoint Start, End;
-
-        public Vector3 BezierHandle;
-
-        private const int SampleCountMultiplier = 2;
-
-        public RailCurve(TrackConnectionPoint start, TrackConnectionPoint end, Vector3 bezierHandle)
-        {
-            BezierHandle = bezierHandle;
-            Start = start;
-            End = end;
-        }
-
-        public List<Vector3> CalculateSegmentPoints(float spacing, float segmentWidth, bool startWithSpacing)
-        {
-            List<SamplingStep> samples = CollectSamples();
-
-            float[] stepsArray = samples.SelectMany(sample => new List<float>() { sample.OffsetOnTrack }).ToArray();
-
-            int maxSegmentsFitting = Convert.ToInt32((samples.Last().OffsetOnTrack - segmentWidth - (startWithSpacing ? spacing : 0)) / (segmentWidth + spacing));
-            float adjustedSpacing = (samples.Last().OffsetOnTrack - segmentWidth - (startWithSpacing ? spacing : 0) - (maxSegmentsFitting * segmentWidth)) / maxSegmentsFitting;
-
-            float segmentIterator = startWithSpacing ? spacing : 0;
-
-            List<Vector3> finalPositions = new List<Vector3>();
-            for (int i = 0; i <= maxSegmentsFitting; i++)
-            {
-                finalPositions.Add(GetPointInSteps(stepsArray, samples, segmentIterator));
-                segmentIterator += segmentWidth + adjustedSpacing;
-            }
-
-            return finalPositions;
-        }
-
-        public List<SamplingStep> CollectSamples()
-        {
-            int samplePointCount = DetermineSamplePointCount();
-
-            double samplingStep = 1f / samplePointCount;
-
-            double currentStep;
-
-            List<SamplingStep> samples = new List<SamplingStep>();
-
-            for (int step = 0; step <= samplePointCount; step++)
-            {
-                currentStep = step * samplingStep;
-                samples.Add(new SamplingStep(EvaluateOnSegment((float)currentStep)));
-            }
-
-            float totalSampleLength = 0f;
-
-            int index = 0;
-            foreach (SamplingStep step in samples)
-            {
-                if (index == samples.Count - 1) break;
-
-                Vector3 nextStep = samples[index + 1].SamplePositon;
-                samples[index].SetVectorToNextSample(nextStep - step.SamplePositon);
-                step.SetOffset(totalSampleLength);
-
-                totalSampleLength += samples[index].VectorToNextSample.magnitude;
-
-                index++;
-            }
-
-            samples.Last().SetOffset(totalSampleLength);
-
-            return samples;
-        }
-
-        public int DetermineSamplePointCount()
-        {
-            Vector3 midPoint = EvaluateOnSegment(0.5f);
-            int roughLengthEstimation = (int)((midPoint - Start.Point).magnitude + (End.Point - midPoint).magnitude);
-            if (roughLengthEstimation < 1) roughLengthEstimation = 1;
-
-            return roughLengthEstimation * SampleCountMultiplier;
-        }
-
-        public Vector3 EvaluateOnSegment(float t)
-        {
-            Vector3 p0 = Vector3.Lerp(Start.Point, BezierHandle, t);
-            Vector3 p1 = Vector3.Lerp(Start.Point, End.Point, t);
-            return Vector3.Lerp(p0, p1, t);
-        }
-
-
-        public Vector3 GetPointInSteps(float[] steps, List<SamplingStep> samples, float t)
-        {
-            int found = Array.BinarySearch(steps, t);
-
-            if (found >= 0)
-            {
-                return samples[found].SamplePositon;
-            }
-            else
-            {
-                int higherSampleIndex = (-found) - 1;
-                int lowerSampleIndex = higherSampleIndex - 1;
-                float higherStepValue = steps[higherSampleIndex];
-                float lowerStepValue = steps[lowerSampleIndex];
-
-                float tOffset = t - lowerStepValue;
-
-                float tPercentage = tOffset / (higherStepValue - lowerStepValue);
-
-                return samples[lowerSampleIndex].SamplePositon + (samples[lowerSampleIndex].VectorToNextSample * tPercentage);
-            }
-        }
-
-        public class SamplingStep
-        {
-            public Vector3 SamplePositon;
-            public Vector3 VectorToNextSample;
-            public float OffsetOnTrack;
-
-            public SamplingStep(Vector3 samplePositon)
-            {
-                SamplePositon = samplePositon;
-            }
-
-            public void SetOffset(float offset)
-            {
-                OffsetOnTrack = offset;
-            }
-
-            public void SetVectorToNextSample(Vector3 vectorToNextSample)
-            {
-                VectorToNextSample = vectorToNextSample;
-            }
-        }
-
-    }
+    
 }
