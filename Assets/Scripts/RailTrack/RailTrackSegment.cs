@@ -1,14 +1,5 @@
-﻿using System;
-using System.CodeDom;
-using System.Collections;
-using System.Linq;
-using System.Net;
-using System.Runtime.InteropServices;
-using Boo.Lang;
+﻿using Boo.Lang;
 using UnityEngine;
-using UnityEditor;
-using UnityEditor.PackageManager.UI;
-using UnityEngine.WSA;
 
 [RequireComponent(typeof(MeshRenderer), typeof(MeshFilter))]
 public class RailTrackSegment : MonoBehaviour
@@ -59,6 +50,11 @@ public class RailTrackSegment : MonoBehaviour
         Curve.End.Point = startPosition;
     }
 
+    public TrackConnectionPoint GetEndConnectionPoint()
+    {
+        return Curve.End;
+    }
+
     public void RecreateMesh(SegmentSettings settings, TrackSettings trackSettings)
     {
         Curve.BezierHandle = Curve.Start.Point +
@@ -99,10 +95,12 @@ public class RailTrackSegment : MonoBehaviour
         List<Vector3> RailSegmentVerticalNormals = new List<Vector3>();
         List<Vector3> NextSegmentVectors = new List<Vector3>();
 
+        Vector3 vectorToNextSample = Vector3.zero;
+
         int sampleIndex = 0;
         foreach (Vector3 sample in samples)
         {
-            Vector3 vectorToNextSample;
+
             if (sampleIndex == samples.Count - 1)
             {
                 vectorToNextSample = sample - samples[sampleIndex - 1];
@@ -133,6 +131,8 @@ public class RailTrackSegment : MonoBehaviour
                 }.ConstructMesh()
                 );
         }
+
+        Curve.End.NormalizedDirection = vectorToNextSample;
 
         List<Vector3> leftTrackNodes = new List<Vector3>();
         List<Vector3> rightTrackNodes = new List<Vector3>();
