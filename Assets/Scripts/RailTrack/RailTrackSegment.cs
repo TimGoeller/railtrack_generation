@@ -1,4 +1,6 @@
-﻿using Boo.Lang;
+﻿using System;
+using System.Linq;
+using Boo.Lang;
 using UnityEngine;
 
 [RequireComponent(typeof(MeshRenderer), typeof(MeshFilter))]
@@ -30,16 +32,6 @@ public class RailTrackSegment : MonoBehaviour
         }
     }
 
-    public Vector3 GetStartPosition()
-    {
-        return Curve.Start.Point;
-    }
-
-    public void SetStartPosition(Vector3 startPosition)
-    {
-        Curve.Start.Point = startPosition;
-    }
-
     public Vector3 GetEndPosition()
     {
         return Curve.End.Point;
@@ -55,23 +47,23 @@ public class RailTrackSegment : MonoBehaviour
         return Curve.End;
     }
 
-    public void RecreateMesh(SegmentSettings settings, TrackSettings trackSettings)
+    public void RecreateMesh(SegmentSettings settings, TrackSettings trackSettings, float spacing, bool firstSegment)
     {
         Curve.BezierHandle = Curve.Start.Point +
                              Curve.Start.NormalizedDirection * (Curve.End.Point - Curve.Start.Point).magnitude ;
-        samples = Curve.CalculateSegmentPoints(0.5f, settings.SegmentWidth, false);
-        CreateMesh(samples, settings, trackSettings);
+        samples = Curve.CalculateSegmentPoints(spacing, settings.SegmentWidth, !firstSegment);
+        CreateMesh(samples, settings, trackSettings, !firstSegment);
     }
 
-    public void Initialize(TrackConnectionPoint start, TrackConnectionPoint end, SegmentSettings settings, TrackSettings trackSettings, float spacing)
+    public void Initialize(TrackConnectionPoint start, TrackConnectionPoint end, SegmentSettings settings, TrackSettings trackSettings, float spacing, bool firstSegment)
     {
         Curve = new RailCurve(start, end, start.Point + start.NormalizedDirection * (end.Point - start.Point).magnitude * 0.9f);
-        samples = Curve.CalculateSegmentPoints(spacing, settings.SegmentWidth, false);
-        CreateMesh(samples, settings, trackSettings);
+        samples = Curve.CalculateSegmentPoints(spacing, settings.SegmentWidth, !firstSegment);
+        CreateMesh(samples, settings, trackSettings, !firstSegment);
     }
 
 
-    public void CreateMesh(List<Vector3> samples, SegmentSettings settings, TrackSettings trackSettings)
+    public void CreateMesh(List<Vector3> samples, SegmentSettings settings, TrackSettings trackSettings, bool connectPrevious)
     {
         #region Initialization
         if (!meshFilter)
@@ -138,6 +130,32 @@ public class RailTrackSegment : MonoBehaviour
         List<Vector3> rightTrackNodes = new List<Vector3>();
 
         int index = 0;
+
+        if (connectPrevious)
+        {
+            Vector3 startOnLastTrack = (Curve.Start.Point) - (settings.SegmentWidth) * Curve.Start.NormalizedDirection;
+            Vector3 vectorToSegmentStart = samples.First() - startOnLastTrack;
+            Vector3 rotatedVector = (Quaternion.AngleAxis(90, Vector3.up) * Curve.Start.NormalizedDirection);
+
+            RailSegmentVerticalNormals.Insert(0, rotatedVector);
+
+            leftTrackNodes.Add(
+                (startOnLastTrack - (settings.SegmentLength / 2)
+                 * rotatedVector
+                 * (1 - trackSettings.TrackOffsetPercentage))
+                + new Vector3(0, settings.SegmentHeight, 0)
+                + vectorToSegmentStart * (settings.SegmentWidth / 2)
+            );
+
+            rightTrackNodes.Add(
+                (startOnLastTrack + (settings.SegmentLength / 2)
+                 * rotatedVector
+                 * (1 - trackSettings.TrackOffsetPercentage))
+                + new Vector3(0, settings.SegmentHeight, 0)
+                + vectorToSegmentStart * (settings.SegmentWidth / 2)
+            );
+        }
+
         foreach (Vector3 sample in samples)
         {
             leftTrackNodes.Add(

@@ -4,5 +4,10 @@ using UnityEngine;
 
 public class RailNetworkManager : MonoBehaviour
 {
-    private List<RailTrack> RailTracks;
+    public List<RailTrack> RailTracks;
+
+    public RailTrackSegment.TrackSettings TrackSettings = new RailTrackSegment.TrackSettings();
+    public RailTrackSegment.SegmentSettings SegmentSettings = new RailTrackSegment.SegmentSettings();
+
+    public float spaceBetweenSegments = 0.5f;
 }

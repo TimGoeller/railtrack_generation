@@ -13,11 +13,52 @@ public class RailNetworkManagerEditor : Editor
 
     private Vector3 InitialPlacementPoint;
 
+    bool trackSettingsFoldout, segmentSettingsFoldout, trackLineSettingsFoldout;
+
     private RailEditorMode mode = RailEditorMode.InitialTrackStartPointPlacement;
 
     private void Awake()
     {
         railNetworkManager = target as RailNetworkManager;
+    }
+
+
+    public override void OnInspectorGUI()
+    {
+        EditorGUI.BeginChangeCheck();
+
+        trackSettingsFoldout = EditorGUILayout.Foldout(trackSettingsFoldout, "Track Settings");
+        if (trackSettingsFoldout)
+        {
+            railNetworkManager.spaceBetweenSegments = EditorGUILayout.FloatField("Space Between Segements", railNetworkManager.spaceBetweenSegments);
+        }
+        segmentSettingsFoldout = EditorGUILayout.Foldout(segmentSettingsFoldout, "Segment Settings");
+        if (segmentSettingsFoldout)
+        {
+            railNetworkManager.SegmentSettings.SegmentWidth = EditorGUILayout.FloatField("Segment Width", railNetworkManager.SegmentSettings.SegmentWidth);
+            railNetworkManager.SegmentSettings.SegmentHeight = EditorGUILayout.FloatField("Segment Height", railNetworkManager.SegmentSettings.SegmentHeight);
+            railNetworkManager.SegmentSettings.SegmentLength = EditorGUILayout.FloatField("Segment Length", railNetworkManager.SegmentSettings.SegmentLength);
+            railNetworkManager.SegmentSettings.SegmentCutoutHeightPercentage = EditorGUILayout.Slider("Segment Cutout Height", railNetworkManager.SegmentSettings.SegmentCutoutHeightPercentage, 0f, 1f);
+            railNetworkManager.SegmentSettings.SegmentCutoutWidthPercentage = EditorGUILayout.Slider("Segment Cutout Width", railNetworkManager.SegmentSettings.SegmentCutoutWidthPercentage, 0f, 1f);
+        }
+        trackLineSettingsFoldout = EditorGUILayout.Foldout(trackLineSettingsFoldout, "Track Line Settings");
+        if (trackLineSettingsFoldout)
+        {
+            railNetworkManager.TrackSettings.TrackMidPercentage = EditorGUILayout.Slider("Track Offset", railNetworkManager.TrackSettings.TrackMidPercentage, 0.03f, 0.9f);
+            railNetworkManager.TrackSettings.TrackOffsetPercentage = EditorGUILayout.Slider("Track Offset", railNetworkManager.TrackSettings.TrackOffsetPercentage, 0.05f, 0.25f);
+            railNetworkManager.TrackSettings.TrackWidth = EditorGUILayout.FloatField("Track Width", railNetworkManager.TrackSettings.TrackWidth);
+            railNetworkManager.TrackSettings.TrackHeight = EditorGUILayout.FloatField("Track Height", railNetworkManager.TrackSettings.TrackHeight);
+        }
+
+        if (EditorGUI.EndChangeCheck())
+        {
+            foreach (RailTrack track in railNetworkManager.RailTracks)
+            {
+                track.ChangeSettings(railNetworkManager.SegmentSettings, railNetworkManager.TrackSettings,
+                    railNetworkManager.spaceBetweenSegments);
+            }
+        }
+
     }
 
     void OnSceneGUI()
@@ -88,7 +129,8 @@ public class RailNetworkManagerEditor : Editor
         newTrackGameObject.transform.parent = railNetworkManager.transform;
         newTrackGameObject.transform.position = Vector3.zero;
         RailTrack railTrack = newTrackGameObject.GetComponent<RailTrack>();
-        railTrack.Initialize(start, end);
+        railNetworkManager.RailTracks.Add(railTrack);
+        railTrack.Initialize(start, end, railNetworkManager.SegmentSettings, railNetworkManager.TrackSettings, railNetworkManager.spaceBetweenSegments);
     }
 
     enum RailEditorMode

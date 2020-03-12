@@ -9,8 +9,6 @@ public class RailTrackEditor : Editor
 {
     RailTrack railTrack;
 
-    bool trackSettingsFoldout, segmentSettingsFoldout, trackLineSettingsFoldout;
-
     private bool leftMouseHeldDown;
 
     private RailTrackEditorMode mode = RailTrackEditorMode.EditLastSegment;
@@ -20,39 +18,6 @@ public class RailTrackEditor : Editor
         railTrack = target as RailTrack;
     }
 
-    public override void OnInspectorGUI()
-    {
-        EditorGUI.BeginChangeCheck();
-        
-        trackSettingsFoldout = EditorGUILayout.Foldout(trackSettingsFoldout, "Track Settings");
-        if(trackSettingsFoldout)
-        {
-            railTrack.spaceBetweenSegments = EditorGUILayout.FloatField("Space Between Segements", railTrack.spaceBetweenSegments);
-        }
-        segmentSettingsFoldout = EditorGUILayout.Foldout(segmentSettingsFoldout, "Segment Settings");
-        if(segmentSettingsFoldout)
-        {
-            railTrack.SegmentSettings.SegmentWidth = EditorGUILayout.FloatField("Segment Width", railTrack.SegmentSettings.SegmentWidth);
-            railTrack.SegmentSettings.SegmentHeight = EditorGUILayout.FloatField("Segment Height", railTrack.SegmentSettings.SegmentHeight);
-            railTrack.SegmentSettings.SegmentLength = EditorGUILayout.FloatField("Segment Length", railTrack.SegmentSettings.SegmentLength);
-            railTrack.SegmentSettings.SegmentCutoutHeightPercentage = EditorGUILayout.Slider("Segment Cutout Height", railTrack.SegmentSettings.SegmentCutoutHeightPercentage, 0f, 1f);
-            railTrack.SegmentSettings.SegmentCutoutWidthPercentage = EditorGUILayout.Slider("Segment Cutout Width", railTrack.SegmentSettings.SegmentCutoutWidthPercentage, 0f, 1f);
-        }
-        trackLineSettingsFoldout = EditorGUILayout.Foldout(trackLineSettingsFoldout, "Track Line Settings");
-        if (trackLineSettingsFoldout)
-        {
-            railTrack.TrackSettings.TrackMidPercentage = EditorGUILayout.Slider("Track Offset", railTrack.TrackSettings.TrackMidPercentage, 0.03f, 0.9f);
-            railTrack.TrackSettings.TrackOffsetPercentage = EditorGUILayout.Slider("Track Offset", railTrack.TrackSettings.TrackOffsetPercentage, 0.05f, 0.25f);
-            railTrack.TrackSettings.TrackWidth = EditorGUILayout.FloatField("Track Width", railTrack.TrackSettings.TrackWidth);
-            railTrack.TrackSettings.TrackHeight = EditorGUILayout.FloatField("Track Height", railTrack.TrackSettings.TrackHeight);
-        }
-
-        if (EditorGUI.EndChangeCheck())
-        {
-            //railTrack.();
-        }
-
-    }
 
     void OnSceneGUI()
     {
@@ -93,6 +58,13 @@ public class RailTrackEditor : Editor
         {
             if(mode != RailTrackEditorMode.AddNewSegment)
                 SwitchToAddMode();
+        }
+
+        GUI.backgroundColor = standardBackgroundColor;
+
+        if (GUI.Button(new Rect(250, 10, 100, 50), "Delete Last"))
+        {
+            railTrack.DeleteLast();
         }
 
         Handles.EndGUI();
